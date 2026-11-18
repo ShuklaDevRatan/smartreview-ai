@@ -5,10 +5,13 @@ import com.drs.smartreview_ai.dto.BusinessResponse;
 import com.drs.smartreview_ai.entity.Business;
 import com.drs.smartreview_ai.entity.User;
 import com.drs.smartreview_ai.enums.BusinessStatus;
+import com.drs.smartreview_ai.exception.ResourceNotFoundException;
 import com.drs.smartreview_ai.repository.BusinessRepository;
 import com.drs.smartreview_ai.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class BusinessService {
@@ -28,7 +31,7 @@ public class BusinessService {
 
         // Find business owner
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Create Business entity
         Business business = new Business();
@@ -50,33 +53,16 @@ public class BusinessService {
         return mapToBusinessResponse(savedBusiness);
     }
 
-    private BusinessResponse mapToBusinessResponse(Business business) {
-
-        BusinessResponse response = new BusinessResponse();
-
-        response.setId(business.getId());
-        response.setName(business.getName());
-        response.setCategory(business.getCategory());
-        response.setDescription(business.getDescription());
-        response.setAddress(business.getAddress());
-        response.setContactNumber(business.getContactNumber());
-        response.setGoogleReviewUrl(business.getGoogleReviewUrl());
-        response.setStatus(business.getStatus());
-        response.setOwnerId(business.getOwner().getId());
-
-        return response;
-    }
-
     public BusinessResponse getBusinessById(Long businessId, Long ownerId) {
 
         Business business = businessRepository
                 .findByIdAndOwnerId(businessId, ownerId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
 
         return mapToBusinessResponse(business);
     }
 
-    public java.util.List<BusinessResponse> getAllBusinesses(Long ownerId) {
+    public List<BusinessResponse> getAllBusinesses(Long ownerId) {
 
         return businessRepository.findAll()
                 .stream()
@@ -92,7 +78,7 @@ public class BusinessService {
 
         Business business = businessRepository
                 .findByIdAndOwnerId(businessId, ownerId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
 
         business.setName(request.getName());
         business.setCategory(request.getCategory());
@@ -113,12 +99,29 @@ public class BusinessService {
 
         Business business = businessRepository
                 .findByIdAndOwnerId(businessId, ownerId)
-                .orElseThrow(() -> new RuntimeException("Business not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
 
         business.setStatus(status);
 
         Business updatedBusiness = businessRepository.save(business);
 
         return mapToBusinessResponse(updatedBusiness);
+    }
+
+    private BusinessResponse mapToBusinessResponse(Business business) {
+
+        BusinessResponse response = new BusinessResponse();
+
+        response.setId(business.getId());
+        response.setName(business.getName());
+        response.setCategory(business.getCategory());
+        response.setDescription(business.getDescription());
+        response.setAddress(business.getAddress());
+        response.setContactNumber(business.getContactNumber());
+        response.setGoogleReviewUrl(business.getGoogleReviewUrl());
+        response.setStatus(business.getStatus());
+        response.setOwnerId(business.getOwner().getId());
+
+        return response;
     }
 }

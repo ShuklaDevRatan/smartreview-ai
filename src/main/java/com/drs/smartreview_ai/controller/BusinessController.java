@@ -2,7 +2,6 @@ package com.drs.smartreview_ai.controller;
 
 import com.drs.smartreview_ai.dto.BusinessRequest;
 import com.drs.smartreview_ai.dto.BusinessResponse;
-import com.drs.smartreview_ai.enums.BusinessStatus;
 import com.drs.smartreview_ai.service.BusinessService;
 
 import jakarta.validation.Valid;
@@ -64,15 +63,5 @@ public class BusinessController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<BusinessResponse> updateBusinessStatus(
-            @PathVariable Long id,
-            @RequestParam Long ownerId,
-            @RequestParam BusinessStatus status) {
-
-        BusinessResponse response =
-                businessService.updateBusinessStatus(id, ownerId, status);
-
-        return ResponseEntity.ok(response);
-    }
+    
 }
