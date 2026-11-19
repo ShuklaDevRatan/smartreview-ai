@@ -1,6 +1,7 @@
 package com.drs.smartreview_ai.dto;
 
 import com.drs.smartreview_ai.enums.BusinessStatus;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,5 +17,6 @@ public class BusinessResponse {
     private String contactNumber;
     private String googleReviewUrl;
     private BusinessStatus status;
+    private BusinessQRResponse qr;
     private Long ownerId;
 }

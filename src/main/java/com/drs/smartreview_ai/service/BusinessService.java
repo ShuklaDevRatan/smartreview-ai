@@ -1,5 +1,6 @@
 package com.drs.smartreview_ai.service;
 
+import com.drs.smartreview_ai.dto.BusinessQRResponse;
 import com.drs.smartreview_ai.dto.BusinessRequest;
 import com.drs.smartreview_ai.dto.BusinessResponse;
 import com.drs.smartreview_ai.entity.Business;
@@ -10,6 +11,7 @@ import com.drs.smartreview_ai.repository.BusinessRepository;
 import com.drs.smartreview_ai.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,22 +20,25 @@ public class BusinessService {
 
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
+    private final BusinessQRService businessQRService;
 
     public BusinessService(
             BusinessRepository businessRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, BusinessQRService businessQRService) {
 
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
+        this.businessQRService = businessQRService;
     }
 
+    @Transactional
     public BusinessResponse createBusiness(BusinessRequest request, Long ownerId) {
 
-        // Find business owner
+        // Owner ko database se fetch kar rahe hain
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Create Business entity
+        // Naya business create kar rahe hain
         Business business = new Business();
 
         business.setName(request.getName());
@@ -42,15 +47,23 @@ public class BusinessService {
         business.setAddress(request.getAddress());
         business.setContactNumber(request.getContactNumber());
         business.setGoogleReviewUrl(request.getGoogleReviewUrl());
-
         business.setStatus(BusinessStatus.ACTIVE);
         business.setOwner(owner);
 
-        // Save business
+        // Business ko pehle save karna zaroori hai
         Business savedBusiness = businessRepository.save(business);
 
-        // Convert entity into response DTO
-        return mapToBusinessResponse(savedBusiness);
+        // Business create hote hi uska QR generate kar rahe hain
+        BusinessQRResponse qrResponse =
+                businessQRService.createBusinessQR(savedBusiness);
+
+        // Business response prepare kar rahe hain
+        BusinessResponse response = mapToBusinessResponse(savedBusiness);
+
+        // Response mein QR details attach kar rahe hain
+        response.setQr(qrResponse);
+
+        return response;
     }
 
     public BusinessResponse getBusinessById(Long businessId, Long ownerId) {
