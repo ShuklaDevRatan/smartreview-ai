@@ -50,4 +50,16 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(exception.getMessage());
     }
+
+    @ExceptionHandler(AIResponseException.class)
+    public ResponseEntity<Map<String, String>> handleAIResponseException(
+            AIResponseException exception) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(response);
+    }
 }
