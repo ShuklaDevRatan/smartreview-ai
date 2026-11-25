@@ -1,30 +1,33 @@
 package com.drs.smartreview_ai.controller;
 
+import com.drs.smartreview_ai.entity.User;
 import com.drs.smartreview_ai.service.BusinessQRService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/businesses")
+@RequiredArgsConstructor
 public class BusinessQRController {
 
     private final BusinessQRService businessQRService;
 
-    public BusinessQRController(BusinessQRService businessQRService) {
-        this.businessQRService = businessQRService;
-    }
-
     @GetMapping("/{businessId}/qr/download")
     public ResponseEntity<byte[]> downloadBusinessQR(
             @PathVariable Long businessId,
-            @RequestParam Long ownerId) {
+            @AuthenticationPrincipal User user) {
 
-        // Owner verify karke QR image generate kar rahe hain
-        byte[] qrImage = businessQRService.downloadBusinessQR(businessId, ownerId);
+        byte[] qrImage = businessQRService.downloadBusinessQR(
+                businessId,
+                user.getId()
+        );
 
-        // PNG image ko download response mein return kar rahe hain
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .header(

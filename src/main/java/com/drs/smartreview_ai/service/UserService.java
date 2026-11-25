@@ -7,36 +7,51 @@ import com.drs.smartreview_ai.enums.UserRole;
 import com.drs.smartreview_ai.exception.ResourceAlreadyExistsException;
 import com.drs.smartreview_ai.repository.UserRepository;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
+
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse registerUser(UserRegistrationRequest request) {
 
-        // Check if email already exists
+        // Check duplicate email
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ResourceAlreadyExistsException("Email already registered");
+            throw new ResourceAlreadyExistsException(
+                    "Email already registered"
+            );
         }
 
-        // Create User entity
+        // Create new user
         User user = new User();
 
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPasswordHash(request.getPassword());
+
+        // BCrypt password hashing
+        user.setPasswordHash(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        // Assign default role
         user.setRole(UserRole.BUSINESS_OWNER);
 
-        // Save user in database
+        // Activate new account
+        user.setIsActive(true);
+
         User savedUser = userRepository.save(user);
 
-        // Convert entity into response DTO
         return mapToUserResponse(savedUser);
     }
 

@@ -24,7 +24,8 @@ public class BusinessService {
 
     public BusinessService(
             BusinessRepository businessRepository,
-            UserRepository userRepository, BusinessQRService businessQRService) {
+            UserRepository userRepository,
+            BusinessQRService businessQRService) {
 
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
@@ -32,13 +33,14 @@ public class BusinessService {
     }
 
     @Transactional
-    public BusinessResponse createBusiness(BusinessRequest request, Long ownerId) {
+    public BusinessResponse createBusiness(
+            BusinessRequest request,
+            Long ownerId) {
 
-        // Owner ko database se fetch kar rahe hain
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
 
-        // Naya business create kar rahe hain
         Business business = new Business();
 
         business.setName(request.getName());
@@ -50,40 +52,40 @@ public class BusinessService {
         business.setStatus(BusinessStatus.ACTIVE);
         business.setOwner(owner);
 
-        // Business ko pehle save karna zaroori hai
         Business savedBusiness = businessRepository.save(business);
 
-        // Business create hote hi uska QR generate kar rahe hain
         BusinessQRResponse qrResponse =
                 businessQRService.createBusinessQR(savedBusiness);
 
-        // Business response prepare kar rahe hain
-        BusinessResponse response = mapToBusinessResponse(savedBusiness);
+        BusinessResponse response =
+                mapToBusinessResponse(savedBusiness);
 
-        // Response mein QR details attach kar rahe hain
         response.setQr(qrResponse);
 
         return response;
     }
 
-    public BusinessResponse getBusinessById(Long businessId, Long ownerId) {
+    public BusinessResponse getBusinessById(
+            Long businessId,
+            Long ownerId) {
 
         Business business = businessRepository
                 .findByIdAndOwnerId(businessId, ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Business not found"));
 
         return mapToBusinessResponse(business);
     }
 
     public List<BusinessResponse> getAllBusinesses(Long ownerId) {
 
-        return businessRepository.findAll()
+        return businessRepository.findAllByOwner_Id(ownerId)
                 .stream()
-                .filter(business -> business.getOwner().getId().equals(ownerId))
                 .map(this::mapToBusinessResponse)
                 .toList();
     }
 
+    @Transactional
     public BusinessResponse updateBusiness(
             Long businessId,
             Long ownerId,
@@ -91,7 +93,8 @@ public class BusinessService {
 
         Business business = businessRepository
                 .findByIdAndOwnerId(businessId, ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Business not found"));
 
         business.setName(request.getName());
         business.setCategory(request.getCategory());
@@ -105,6 +108,7 @@ public class BusinessService {
         return mapToBusinessResponse(updatedBusiness);
     }
 
+    @Transactional
     public BusinessResponse updateBusinessStatus(
             Long businessId,
             Long ownerId,
@@ -112,7 +116,8 @@ public class BusinessService {
 
         Business business = businessRepository
                 .findByIdAndOwnerId(businessId, ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Business not found"));
 
         business.setStatus(status);
 
