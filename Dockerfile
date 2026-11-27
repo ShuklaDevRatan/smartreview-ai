@@ -3,11 +3,13 @@ FROM maven:3.9-eclipse-temurin-25 AS build
 
 WORKDIR /app
 
+COPY settings.xml /root/.m2/settings.xml
+
 COPY pom.xml .
 
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+RUN mvn -B -ntp clean package -DskipTests
 
 # RUNTIME STAGE
 FROM eclipse-temurin:25-jre
