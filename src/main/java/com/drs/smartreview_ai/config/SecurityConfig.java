@@ -93,7 +93,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://10.76.125.212:5173"
+                "http://10.76.125.212:5173",
+                "https://smartreview-ai-frontend.onrender.com"
         ));
 
         configuration.setAllowedMethods(List.of(
