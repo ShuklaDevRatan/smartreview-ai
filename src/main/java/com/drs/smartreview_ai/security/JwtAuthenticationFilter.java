@@ -44,7 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (!authorizationHeader.startsWith("Bearer ")) {
+        if (!authorizationHeader.startsWith("Bearer ")
+                || authorizationHeader.substring(7).isBlank()) {
             sendUnauthorized(response);
             return;
         }

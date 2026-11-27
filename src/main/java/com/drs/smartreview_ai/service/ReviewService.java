@@ -7,7 +7,7 @@ import com.drs.smartreview_ai.dto.ReviewSuggestionResponse;
 import com.drs.smartreview_ai.entity.Business;
 import com.drs.smartreview_ai.entity.BusinessQR;
 import com.drs.smartreview_ai.exception.ResourceNotFoundException;
-
+import com.drs.smartreview_ai.enums.BusinessStatus;
 import java.util.List;
 
 @Service
@@ -32,12 +32,15 @@ public class ReviewService {
                         new ResourceNotFoundException("QR Code not found"));
 
         // Inactive QR ke liye suggestions generate nahi karenge
-        if (!businessQR.getIsActive()) {
-            throw new ResourceNotFoundException("QR Code is inactive");
-        }
-
         // QR se associated business ki details nikal rahe hain
         Business business = businessQR.getBusiness();
+
+// Inactive business ke liye review generate nahi karenge
+        if (business.getStatus() != BusinessStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Business is inactive");
+        }
+
+
 
         // Gemini ke liye business-specific prompt prepare kar rahe hain
         String prompt = """

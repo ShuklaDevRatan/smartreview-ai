@@ -44,8 +44,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/auth/login",
-                                "/api/reviews/**",
-                                "/q/**"
+                                "/api/reviews/*/suggestions",
+                                "/q/*"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

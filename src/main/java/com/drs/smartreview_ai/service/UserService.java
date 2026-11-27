@@ -27,7 +27,9 @@ public class UserService {
     public UserResponse registerUser(UserRegistrationRequest request) {
 
         // Check duplicate email
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new ResourceAlreadyExistsException(
                     "Email already registered"
             );
@@ -37,7 +39,7 @@ public class UserService {
         User user = new User();
 
         user.setName(request.getName());
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
 
         // BCrypt password hashing
         user.setPasswordHash(

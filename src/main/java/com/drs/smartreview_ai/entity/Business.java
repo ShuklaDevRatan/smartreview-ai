@@ -15,18 +15,22 @@ public class Business {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String category;
 
+    @Column(length = 1000)
     private String description;
 
+    @Column(length = 500)
     private String address;
 
+    @Column(length = 15)
     private String contactNumber;
 
+    @Column(length = 500)
     private String googleReviewUrl;
 
     @Enumerated(EnumType.STRING)

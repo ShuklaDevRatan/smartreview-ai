@@ -8,6 +8,7 @@ import com.drs.smartreview_ai.exception.ResourceNotFoundException;
 import com.drs.smartreview_ai.repository.BusinessQRRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import com.drs.smartreview_ai.enums.BusinessStatus;
 
 
 import com.google.zxing.BarcodeFormat;
@@ -16,6 +17,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -141,13 +143,19 @@ public class BusinessQRService {
             throw new ResourceNotFoundException("QR Code is inactive");
         }
 
+// Associated business ki details fetch kar rahe hain
+        Business business = businessQR.getBusiness();
+
+// Inactive business ka QR access block karenge
+        if (business.getStatus() != BusinessStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Business is inactive");
+        }
+
         // Total scan count increase kar rahe hain
         businessQR.setScanCount(businessQR.getScanCount() + 1);
 
         businessQRRepository.save(businessQR);
 
-        // Associated business ki details fetch kar rahe hain
-        Business business = businessQR.getBusiness();
 
         // Business details ko response DTO mein map kar rahe hain
         BusinessQRScanResponse response = new BusinessQRScanResponse();
